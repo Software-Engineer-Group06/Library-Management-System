@@ -1,0 +1,14 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+env/
+
+# IDE settings (Visual Studio Code, PyCharm)
+.vscode/
+.idea/
+
+# Database sensitive info
+config.py
