@@ -30,23 +30,42 @@ def process_borrowing(member_id, book_id, member_type, manual_due_date=None):
         return False, f"Unpaid fines ({total_fines} VND) exceed 50,000 VND limit."
     
     # Xác định ngày đến hạn (Default or Manual)
-    due_date = manual_due_date if manual_due_date else datetime.now() + timedelta(days=14)
+    if manual_due_date:
+        if isinstance(manual_due_date, str):
+            try:
+                # Ép kiểu từ string sang datetime (YYYY-MM-DD)
+                due_date = datetime.strptime(manual_due_date, '%Y-%m-%d')
+            except ValueError:
+                return False, "Invalid date format. Please use YYYY-MM-DD."
+        else:
+            due_date = manual_due_date
+    else:
+        # Default: 14 ngày kể từ hôm nay
+        due_date = datetime.now() + timedelta(days=14)
     
-    # Tạo Transaction theo định dạng ISS-date
+    # Tạo Transaction theo định dạng ISS-datetime thêm time để tránh trùng lặp
     trans_id = f"ISS-{datetime.now().strftime('%Y%m%d%H%M%S')}"
     success = create_issue_transaction(trans_id, member_id, book_id, due_date)
     
     return success, "Success" if success else "DB Error"
 
 def process_returning(book_id, due_date):
-    """Xử lý yêu cầu trả sách và tự động tính tiền phạt, 
-    trả về thành công hoặc thất bại và giá tiền phạt"""
+    """
+    Xử lý yêu cầu trả sách và tự động tính tiền phạt, 
+    trả về thành công hoặc thất bại và giá tiền phạt,
+    Cấu trúc datetime trong mysql có dạng chuẩn là: YYYY-MM-DD HH:MM:SS
+    VD: ngày mượn 2026-01-17 00:00:00  --> 2026-01-31 00:00:00
+    --> tính phạt sau ngày 31, ép về date = Y-M-D để xử lý không dùng H:M:S
+    """
     # Lấy thời gian hệ thống hiện tại 
-    return_date = datetime.now()
+    return_date = datetime.now().date()
     
-    # Chuyển due_date nế đang string sang datetime
+    # Chuyển due_date nếu đang string sang datetime
     if isinstance(due_date, str):
-        due_date = datetime.strptime(due_date, '%Y-%m-%d %H:%M:%S')
+        try:
+            due_date = datetime.strptime(due_date, '%Y-%m-%d')
+        except ValueError:
+            return False, "Invalid date format. Please use YYYY-MM-DD."
         
     # Automated Fine Calculation
     fine_amount = 0
