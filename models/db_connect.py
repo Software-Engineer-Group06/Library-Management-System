@@ -1,10 +1,10 @@
-import mysql.connector
-from config import DB_CONFIG # Import từ file config
+import mysql.connector 
+from config import DB_CONFIG
 
 def get_connection():
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         return conn
-    except Exception as e:
-        print(f"Error connecting to DB: {e}")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
         return None
