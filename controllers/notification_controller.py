@@ -1,54 +1,76 @@
+import mysql
+import mysql.connector
+
 from models.db_connect import Database
 
 class NotificationService:
     def __init__(self):
         self.db = Database()
 
-    def due_soon_notifications(self):
+    def show_notifications(self):
         conn = self.db.connect()
         cursor = conn.cursor(dictionary=True)
-
         query = """
-        SELECT member_id, book_id
-        FROM borrowings
-        WHERE return_date IS NULL
-        AND DATEDIFF(due_date, CURDATE()) = 2
+        SELECT message, sentDate 
+        FROM Notification 
+        ORDER BY sentDate DESC
         """
+    
+        try:
+            cursor.execute(query)
+            notifications = cursor.fetchall()
 
-        cursor.execute(query)
+            if not notifications:
+                print("\nNo notifications:")
+                print("No new notifications.")
+                return
 
-        for row in cursor.fetchall():
-            msg = f"Reminder: Book {row['book_id']} is due in 2 days."
-            cursor.execute(
-                "INSERT INTO notifications (member_id, message) VALUES (%s, %s)",
-                (row["member_id"], msg)
-            )
+            print("\nNotifications exist:")
+            print("\nNotifications:")
+        
+            for note in notifications:
+                formatted_date = note['sentDate'].strftime("%d/%m/%Y")
+                print(f"[{formatted_date}] {note['message']}")
 
-        conn.commit()
-        cursor.close()
-        self.db.close()
-
-    # MEMBER
-    def get_notifications(self, member_id):
+        except Exception as err:
+            print(f"Lỗi khi tải thông báo: {err}")
+        finally:
+            cursor.close()
+            conn.close()
+    def generate_due_reminders(self):
         conn = self.db.connect()
-        cursor = conn.cursor()
-
-        cursor.execute(
-            "SELECT message, created_at FROM notifications WHERE member_id=%s",
-            (member_id,)
-        )
-
-        data = cursor.fetchall()
-        cursor.close()
-        self.db.close()
-        return data
-
-    def show_notifications(member_id):
-        service = NotificationService()
-        data = service.get_notifications(member_id)
-
-        if not data:
-            print("No notifications.")
-        else:
-            for msg, time in data:
-                print(f"[{time}] {msg}")
+        cursor = conn.cursor(dictionary=True)
+    
+        # Tìm các sách còn đúng 2 ngày nữa là đến hạn (DATEDIFF = 2)
+        # và chưa trả (returnDate IS NULL)
+        query_check = """
+        SELECT bt.memberID, b.title, bt.dueDate
+        FROM BorrowTransaction bt
+        JOIN Book b ON bt.bookID = b.bookID
+        WHERE bt.returnDate IS NULL 
+          AND DATEDIFF(bt.dueDate, CURDATE()) = 2
+        """
+    
+        try:
+            cursor.execute(query_check)
+            due_soon = cursor.fetchall()
+        
+            for record in due_soon:
+                msg = f"Reminder: Book '{record['title']}' is due in 2 days."
+            
+                # Chèn vào bảng Notification (ID tự sinh hoặc bạn tự định nghĩa)
+                # Giả sử dùng hàm tạo ID đơn giản
+                notify_id = f"NOTI{datetime.now().strftime('%f')}" 
+            
+                insert_query = """
+                INSERT INTO Notification (notifyID, memberID, message, sentDate)
+                VALUES (%s, %s, %s, NOW())
+                """
+                cursor.execute(insert_query, (notify_id, record['memberID'], msg))
+        
+            conn.commit()
+        except Exception as err:
+            print(f"Lỗi tạo nhắc nhở: {err}")
+        finally:
+            cursor.close()
+            conn.close()
