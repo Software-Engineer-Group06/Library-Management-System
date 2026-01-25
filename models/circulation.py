@@ -1,5 +1,5 @@
 from models.db_connect import get_connection
-
+from datetime import datetime
 
 class CirculationModel:
     STATUS_ISSUED = "Issued"
@@ -242,6 +242,42 @@ class CirculationModel:
             conn.rollback()
             print(f"Error updating payment: {e}")
             return False
+        finally:
+            cursor.close()
+            conn.close()
+            
+    def create_transID(self):
+        """Tạo mã giao dịch tự tăng theo định dạng T-YYYY-XXXX"""
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        current_year = datetime.now().year
+        prefix = f"T-{current_year}"
+        
+        try:
+            # Tìm mã giao dịch lớn nhất của năm hiện tại
+            cursor.execute("""
+                SELECT transID FROM BorrowTransaction 
+                WHERE transID LIKE %s 
+                ORDER BY transID DESC LIMIT 1
+            """, (f"{prefix}-%",))
+            
+            result = cursor.fetchone()
+            
+            if result:
+                # result[0] ví dụ: "T-2026-0005" -> tách lấy "0005" -> chuyển thành 5
+                last_val = result[0]
+                last_seq = int(last_val.split('-')[-1])
+                new_seq = last_seq + 1
+            else:
+                # Nếu năm mới chưa có giao dịch nào
+                new_seq = 1
+                
+            return f"{prefix}-{new_seq:04d}" # Trả về định dạng T-2026-0001
+            
+        except Exception as e:
+            print(f"Error creating transID: {e}")
+            return f"T-{datetime.now().strftime('%Y%m%d%H%M%S')}" # Fallback nếu lỗi
         finally:
             cursor.close()
             conn.close()
