@@ -62,9 +62,56 @@ class CirculationModel:
         finally:
             cursor.close()
             conn.close()
-
+            
+    def get_member_type(self, member_id):
+        """Lấy vai trò của member (Student/Teacher) từ database"""
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("SELECT memberType FROM Member WHERE memberID = %s", (member_id,))
+            result = cursor.fetchone()
+            
+            if result:
+                return result[0]  # Trả về 'Student' hoặc 'Teacher'
+            return None  # Không tìm thấy thành viên
+        except Exception as e:
+            print(f"Model Error: {e}")
+            return None
+        finally:
+            cursor.close()
+            conn.close()
+    
+    def get_due_date(self, book_id):
+        """Lấy ngày đến hạn (dueDate) của một cuốn sách đang được mượn"""
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Truy vấn bản ghi mượn sách mới nhất mà chưa có ngày trả (returnDate IS NULL)
+            cursor.execute(
+                """
+                SELECT dueDate FROM BorrowTransaction 
+                WHERE bookID = %s AND returnDate IS NULL
+                ORDER BY transID DESC LIMIT 1
+                """, 
+                (book_id,)
+            )
+            result = cursor.fetchone()
+            
+            # Trả về đối tượng date nếu tìm thấy, ngược lại trả về None
+            return result[0] if result else None
+            
+        except Exception as e:
+            print(f"Model Error (get_due_date): {e}")
+            return None
+        finally:
+            cursor.close()
+            conn.close()
+        
+        
     def create_issue_transaction(self, trans_id, member_id, book_id, due_date):
-        """Tạo giao dịch mượn mới và cập nhật trạng thái sách thành 'Borrowed'"""
+        """Tạo giao dịch mượn mới và cập nhật trạng thái sách thành 'Issued'"""
         conn = get_connection()
         cursor = conn.cursor()
         
@@ -117,7 +164,6 @@ class CirculationModel:
                 """,
                 (book_id,),
             )
-            
             result = cursor.fetchone()
             
             if result is None:
@@ -140,7 +186,7 @@ class CirculationModel:
             
             # Nếu có tiền phạt, thêm record vào bảng Fine
             if fine_amount and fine_amount > 0:
-                fine_id = f"FIN-{trans_id}"
+                fine_id = f"F-{trans_id}"
                 cursor.execute(
                     """
                     INSERT INTO Fine (fineID, transID, amount, isPaid) 
@@ -159,6 +205,43 @@ class CirculationModel:
             print(f"System error: {e}")
             return False
             
+        finally:
+            cursor.close()
+            conn.close()
+            
+    def get_fine_details(self, trans_id):
+        """Lấy chi tiết tiền phạt dựa trên mã giao dịch"""
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            # Truy vấn kết hợp bảng Fine và BorrowTransaction để tính số ngày trễ
+            cursor.execute(
+            """
+                SELECT f.transID, f.amount, f.isPaid, 
+                       DATEDIFF(br.returnDate, br.dueDate) as lateDays
+                FROM Fine f
+                JOIN BorrowTransaction br ON f.transID = br.transID
+                WHERE f.transID = %s
+            """,
+            (trans_id,),
+            )
+            return cursor.fetchone() # Trả về tuple hoặc None
+        finally:
+            cursor.close()
+            conn.close()
+
+    def update_fine_payment(self, trans_id):
+        """Cập nhật trạng thái đã thanh toán tiền phạt"""
+        conn = get_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("UPDATE Fine SET isPaid = TRUE WHERE transID = %s", (trans_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            conn.rollback()
+            print(f"Error updating payment: {e}")
+            return False
         finally:
             cursor.close()
             conn.close()
