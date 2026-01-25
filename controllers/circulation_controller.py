@@ -57,8 +57,8 @@ class CirculationController:
             # Default: 14 ngày kể từ hôm nay
             due_date = datetime.now().date() + timedelta(days=14)
         
-        # Tạo Transaction theo định dạng T-datetime thêm microseconds để tránh trùng lặp
-        trans_id = f"T-{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
+        # Tạo Transaction tự động
+        trans_id = self.model.create_transID()
         success = self.model.create_issue_transaction(trans_id, member_id, book_id, due_date)
         
         if success:
