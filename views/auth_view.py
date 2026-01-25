@@ -19,7 +19,8 @@ class AuthView:
         print("\n--- LOGIN ---")
         user_id = input("User ID: ")
         # Sử dụng getpass để ẩn mật khẩu thành ***** hoặc không hiện gì
-        password = getpass.getpass("Password: ") 
+        # password = getpass.getpass("Password: ") 
+        password = input("Password: ")
         return user_id, password
 
     def show_message(self, message):
