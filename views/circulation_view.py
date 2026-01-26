@@ -15,7 +15,7 @@ class CirculationView:
         member_id = input("Enter Member ID: ")
         book_id = input("Enter Book ID: ")
         
-        print("Enter Due Date (YYYY-MM-DD) [Press Enter for 14 days]: ", end="")
+        print("Enter Due Date (DD/MM/YYYY) [Press Enter for 14 days]: ", end="")
         manual_due_date = input().strip()
         
         # Gọi controller xử lý
@@ -40,13 +40,13 @@ class CirculationView:
         if success:
             # Nếu có phạt (late), in dòng hệ thống + chi tiết phạt theo đặc tả
             if fine_amount > 0:
-                print(f"\n>> System detects Return Date: {datetime.now().strftime('%Y-%m-%d')}")
+                print(f"\n>> System detects Return Date: {datetime.now().strftime("%d/%m/%Y")}")
                 print("Book returned successfully.")
                 print(f"Late days: {late_days}")
                 print(f"Fine amount: {fine_amount:,.0f} VND")
             else:
                 # Trả đúng hạn
-                print("\nBook returned successfully.")
+                print(f"\n{message}")
         else:
             print(f"\nReturn failed. {message}")
 

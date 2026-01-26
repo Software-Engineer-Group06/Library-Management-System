@@ -44,9 +44,9 @@ class CirculationController:
         if manual_due_date:
             if isinstance(manual_due_date, str):
                 try:
-                    due_date = datetime.strptime(manual_due_date, "%Y-%m-%d").date()
+                    due_date = datetime.strptime(manual_due_date, "%d/%m/%Y").date()
                 except ValueError:
-                    return False, "Invalid date format. Please use YYYY-MM-DD."
+                    return False, "Invalid date format. Please use DD/MM/YYYY."
             elif isinstance(manual_due_date, datetime):
                 due_date = manual_due_date.date()
             elif isinstance(manual_due_date, date):
@@ -62,7 +62,8 @@ class CirculationController:
         success = self.model.create_issue_transaction(trans_id, member_id, book_id, due_date)
         
         if success:
-            return True, f"Success: Book issued successfully. Due date: {due_date}."
+            formatted_date = due_date.strftime("%d/%m/%Y")
+            return True, f"Due date: {formatted_date}."
         else:
             return False, "System Error: Failed to record transaction."
 
