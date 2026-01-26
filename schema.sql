@@ -1,8 +1,8 @@
--- 1. Tạo Database
+-- Tạo Database
 CREATE DATABASE IF NOT EXISTS LibraryDB;
 USE LibraryDB;
 
--- 2. Bảng USER (Cha)
+-- Bảng USER (Cha)
 CREATE TABLE IF NOT EXISTS User (
     userID VARCHAR(20) PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS User (
     role INT NOT NULL -- 1: Librarian, 2: Member
 );
 
--- 3. Bảng LIBRARIAN (Sửa lại cho đồng bộ với Member)
+-- Bảng LIBRARIAN
 CREATE TABLE IF NOT EXISTS Librarian (
     librarianID VARCHAR(20) PRIMARY KEY,
     userID VARCHAR(20) UNIQUE, -- Link 1-1 với User
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS Librarian (
     FOREIGN KEY (userID) REFERENCES User(userID) ON DELETE CASCADE
 );
 
--- 4. Bảng MEMBER
+-- Bảng MEMBER
 CREATE TABLE IF NOT EXISTS Member (
     memberID VARCHAR(20) PRIMARY KEY,
     userID VARCHAR(20) UNIQUE,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS Member (
     FOREIGN KEY (userID) REFERENCES User(userID) ON DELETE CASCADE
 );
 
--- 5. Bảng BOOK
+-- Bảng BOOK
 CREATE TABLE IF NOT EXISTS Book (
     bookID VARCHAR(20) PRIMARY KEY,
     title NVARCHAR(255) NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS Book (
     status VARCHAR(20) DEFAULT 'Available'
 );
 
--- 6. Bảng GIAO DỊCH MƯỢN/TRẢ
+-- Bảng GIAO DỊCH MƯỢN/TRẢ
 CREATE TABLE IF NOT EXISTS BorrowTransaction (
     transID VARCHAR(20) PRIMARY KEY,
     memberID VARCHAR(20),
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS BorrowTransaction (
     FOREIGN KEY (bookID) REFERENCES Book(bookID)
 );
 
--- 7. Bảng PHẠT
+-- Bảng PHẠT
 CREATE TABLE IF NOT EXISTS Fine (
     fineID VARCHAR(20) PRIMARY KEY,
     transID VARCHAR(20) UNIQUE,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS Fine (
     FOREIGN KEY (transID) REFERENCES BorrowTransaction(transID)
 );
 
--- 8. Bảng ĐẶT TRƯỚC (Reservation) - (Optional)
+-- Bảng ĐẶT TRƯỚC (Reservation) - (Optional)
 CREATE TABLE IF NOT EXISTS Reservation (
     reservationID VARCHAR(20) PRIMARY KEY,
     memberID VARCHAR(20),
@@ -83,12 +83,12 @@ VALUES ('ADMIN01', 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa82
 
 INSERT INTO User (userID, username, password, fullName, email, phone, role) 
 VALUES (
-    'ADMIN02', 
-    'admin2', 
-    '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 
-    'Super Admin', 
-    'admin@library.com', 
-    '0909123456', 
+    'ADMIN02',
+    'admin2',
+    '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',
+    'Super Admin',
+    'admin@library.com',
+    '0909123456',
     1
 );
 

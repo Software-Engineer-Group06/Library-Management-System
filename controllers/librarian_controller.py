@@ -1,6 +1,8 @@
 from views.librarian_view import LibrarianView
 from models.member import MemberModel
-
+from controllers.book_controller import BookController
+from controllers.report_notify_controller import ReportNotifyController
+from controllers.circulation_controller import CirculationController
 class LibrarianController:
     def __init__(self):
         self.view = LibrarianView()
@@ -12,11 +14,14 @@ class LibrarianController:
             if choice == '1':
                 self.register_member()
             elif choice == '2':
-                print("Feature managed by Member 1")
-                input()
+                book_app = BookController()
+                book_app.run()
             elif choice == '3':
-                print("Feature managed by Member 2")
-                input()
+                circ_app = CirculationController()
+                circ_app.run()
+            elif choice == '4':
+                report_app = ReportNotifyController()   
+                report_app.run()
             elif choice == '0':
                 break
 

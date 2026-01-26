@@ -14,7 +14,7 @@ class CirculationModel:
         cursor = conn.cursor()
         
         # thêm ngoại lệ nếu không tìm thấy member id
-        try: 
+        try:
             # Đếm số giao dịch chưa trả (returnDate IS NULL)
             cursor.execute(
                 """
@@ -89,8 +89,7 @@ class CirculationModel:
         
         try:
             # Truy vấn bản ghi mượn sách mới nhất mà chưa có ngày trả (returnDate IS NULL)
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT dueDate FROM BorrowTransaction 
                 WHERE bookID = %s AND returnDate IS NULL
                 ORDER BY transID DESC LIMIT 1
@@ -147,6 +146,55 @@ class CirculationModel:
         finally:
             cursor.close()
             conn.close()
+    def issue_book(self, member_id, book_id):
+        """
+        Hàm xử lý trọn gói quy trình mượn sách.
+        Logic: Check sách -> Check hạn mức -> Sinh ID -> Tính ngày trả -> Insert DB
+        Output: Chuỗi thông báo kết quả (SUCCESS|... hoặc LIMIT_EXCEEDED|...)
+        """
+        conn = get_connection()
+        if not conn: return "DB_ERROR"
+        
+        try:
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+            # B1: Kiểm tra sách có sẵn sàng không
+            cursor.execute("SELECT status, title FROM Book WHERE bookID = %s", (book_id,))
+            book = cursor.fetchone()
+            if not book: return "BOOK_NOT_FOUND"
+            if book['status'] != self.STATUS_AVAILABLE: return "BOOK_NOT_AVAILABLE"
+
+            # B2: Kiểm tra hạn mức mượn (Sinh viên max 5, GV max 10)
+            # Lấy role
+            cursor.execute("SELECT memberType, borrowLimit FROM Member WHERE memberID = %s", (member_id,))
+            member = cursor.fetchone()
+            if not member: return "MEMBER_NOT_FOUND"
+
+            # Đếm số sách đang mượn
+            cursor.execute("SELECT COUNT(*) as count FROM BorrowTransaction WHERE memberID = %s AND returnDate IS NULL", (member_id,))
+            current_borrow = cursor.fetchone()['count']
+            
+            # Logic check limit (Ưu tiên số trong DB, nếu null thì mặc định 5)
+            limit = member['borrowLimit'] if member['borrowLimit'] else 5
+            if current_borrow >= limit:
+                return "LIMIT_EXCEEDED"
+
+            # B3: Chuẩn bị dữ liệu Insert
+            trans_id = self.create_transID() # Gọi hàm sinh ID nội bộ
+            # Mượn 14 ngày
+            due_date = datetime.now() + timedelta(days=14)
+
+            # B4: Thực hiện Transaction (Gọi hàm Insert cấp thấp)
+            if self.create_issue_transaction(trans_id, member_id, book_id, due_date):
+                return f"SUCCESS|{trans_id}|{book['title']}|{due_date.date()}"
+            else:
+                return "INSERT_FAILED"
+
+        except Exception as e:
+            print(f"Error issue_book: {e}")
+            return f"SYSTEM_ERROR|{e}"
+        finally:
+            conn.close()
         
 
     def update_return_book(self, book_id, fine_amount):
@@ -173,16 +221,16 @@ class CirculationModel:
             trans_id = result[0] # Lấy giá trị transID từ tuple kết quả
             
             # Cập nhật ngày trả sách trong BorrowTransaction
-            cursor.execute(
-                "UPDATE BorrowTransaction SET returnDate = NOW() WHERE transID = %s",
-                (trans_id,),
-            )
+            cursor.execute("""
+                UPDATE BorrowTransaction 
+                SET returnDate = NOW() WHERE transID = %s
+            """,(trans_id,),)
             
             # Cập nhật trạng thái sách về "Available"
-            cursor.execute(
-                "UPDATE Book SET status = %s WHERE bookID = %s",
-                (self.STATUS_AVAILABLE, book_id),
-            )
+            cursor.execute("""
+                UPDATE Book 
+                SET status = %s WHERE bookID = %s
+            """,(self.STATUS_AVAILABLE, book_id),)
             
             # Nếu có tiền phạt, thêm record vào bảng Fine
             if fine_amount and fine_amount > 0:
@@ -191,9 +239,7 @@ class CirculationModel:
                     """
                     INSERT INTO Fine (fineID, transID, amount, isPaid) 
                     VALUES (%s, %s, %s, %s)
-                    """,
-                    (fine_id, trans_id, fine_amount, False),
-                )
+                    """,(fine_id, trans_id, fine_amount, False),)
                 
             conn.commit()
             print(f"Book returned successfully! Transaction code {trans_id}")
@@ -217,8 +263,7 @@ class CirculationModel:
             # Truy vấn kết hợp bảng Fine và BorrowTransaction để tính số ngày trễ
             cursor.execute(
             """
-                SELECT f.transID, f.amount, f.isPaid, 
-                       DATEDIFF(br.returnDate, br.dueDate) as lateDays
+                SELECT f.transID, f.amount, f.isPaid, DATEDIFF(br.returnDate, br.dueDate) as lateDays
                 FROM Fine f
                 JOIN BorrowTransaction br ON f.transID = br.transID
                 WHERE f.transID = %s
@@ -257,7 +302,8 @@ class CirculationModel:
         try:
             # Tìm mã giao dịch lớn nhất của năm hiện tại
             cursor.execute("""
-                SELECT transID FROM BorrowTransaction 
+                SELECT transID 
+                FROM BorrowTransaction 
                 WHERE transID LIKE %s 
                 ORDER BY transID DESC LIMIT 1
             """, (f"{prefix}-%",))
