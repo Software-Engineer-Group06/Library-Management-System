@@ -40,6 +40,25 @@ class CirculationController:
                 print(f"Return Date: {r_date}")            
                 print("-" * 20)
         input("(Press Enter)")
+    def run_fine_check(self):
+        trans_id = self.view.get_fine_check_input()
+        
+        fine_data = self.model.get_fine_details(trans_id)
+        
+        if fine_data:
+            confirm_pay = self.view.display_fine_details(fine_data)
+            
+            if confirm_pay:
+                if self.model.pay_fine(fine_data['FineID']):
+                    self.view.display_payment_success()
+                else:
+                    self.view.display_issue_fail("Payment Error") # Tái sử dụng hàm báo lỗi
+            else:
+                if not fine_data['Paid']:
+                    print("\nPayment skipped.")
+                    input("(Press Enter)")
+        else:
+            self.view.display_fine_not_found()
 
     def run_fine_check(self):
         # Nhập Transaction ID và hiển thị tiền phạt

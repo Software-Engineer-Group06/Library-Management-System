@@ -197,3 +197,49 @@ class CirculationModel:
             self.db.rollback()
             print(f"[Error] Reserve Book: {e}")
             return False, "System error during reservation."
+    def get_fine_details(self, trans_id):
+        """
+        Lấy thông tin tiền phạt dựa trên Transaction ID
+        """
+        cursor = self.db.cursor(dictionary=True)
+        # Join bảng FINE và BORROW_TRANSACTION để lấy ngày và trạng thái
+        query = """
+            SELECT F.FineID, F.Amount, F.Paid, BT.TransID, BT.DueDate, BT.ReturnDate
+            FROM FINE F
+            JOIN BORROW_TRANSACTION BT ON F.TransID = BT.TransID
+            WHERE BT.TransID = %s
+        """
+        cursor.execute(query, (trans_id,))
+        result = cursor.fetchone()
+        
+        if result:
+            # Tính số ngày trễ để hiển thị
+            if result['ReturnDate'] and result['DueDate']:
+                # Ép kiểu nếu driver trả về string
+                r_date = result['ReturnDate']
+                d_date = result['DueDate']
+                # Nếu là string thì convert, nếu là date thì trừ trực tiếp
+                from datetime import datetime, date
+                if isinstance(r_date, str): r_date = datetime.strptime(r_date, '%Y-%m-%d').date()
+                if isinstance(d_date, str): d_date = datetime.strptime(d_date, '%Y-%m-%d').date()
+                
+                late_days = (r_date - d_date).days
+                result['late_days'] = max(0, late_days)
+            else:
+                result['late_days'] = 0
+                
+            return result
+        return None
+
+    def pay_fine(self, fine_id):
+        """
+        Thanh toán tiền phạt
+        """
+        try:
+            cursor = self.db.cursor()
+            query = "UPDATE FINE SET Paid = TRUE WHERE FineID = %s"
+            cursor.execute(query, (fine_id,))
+            self.db.commit()
+            return True
+        except Exception:
+            return False

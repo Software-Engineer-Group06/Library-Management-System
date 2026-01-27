@@ -90,7 +90,7 @@ INSERT INTO LIBRARIAN VALUES ('LIB01');
 
 -- Tạo User Member
 INSERT INTO USER VALUES ('MEM01', 'student1', 'e86fdc2283ce92a83e054170e5f2425032543e49339239567c9c0f997f374347', 'Nguyen Van A', 'a@email.com', '0909999999', '2006-07-06', 2);
--- Insert vào bảng Member (Lưu ý: memberID đang giả định trùng với userID trong code cũ của bạn, nhưng logic đúng nên là auto-gen)
+-- Insert vào bảng Member
 INSERT INTO MEMBER VALUES ('MEM01', 'IT', 5, 'Student', 'MEM01');
 
 -- Tạo Sách

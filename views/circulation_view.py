@@ -55,3 +55,30 @@ class CirculationView:
     def display_return_fail(self):
         print("\nReturn failed. Book ID not found or not currently issued.")
         input("(Press Enter to continue)")
+    def get_fine_check_input(self):
+        self.clear_screen()
+        print("FINE CALCULATION & PAYMENT")
+        return input("Enter Transaction ID: ")
+
+    def display_fine_details(self, data):
+        print("\nFine Details:")
+        print(f"Transaction ID: {data['TransID']}")
+        print(f"Late days: {data['late_days']}")
+        print(f"Fine amount: {data['Amount']:,.0f} VND")
+        
+        status = "Paid" if data['Paid'] else "Unpaid"
+        print(f"Payment status: {status}")
+        
+        # Nếu chưa trả, hỏi user có muốn trả luôn không
+        if not data['Paid']:
+            choice = input("\nDo you want to pay this fine now? (y/n): ")
+            return choice.lower() == 'y'
+        return False
+
+    def display_payment_success(self):
+        print("\nFine paid successfully.")
+        input("(Press Enter to continue)")
+
+    def display_fine_not_found(self):
+        print("\nNo fine record found for this Transaction ID.")
+        input("(Press Enter to continue)")
