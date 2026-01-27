@@ -36,7 +36,6 @@ class ReportView:
     def display_most_borrowed_report(self, data):
         print("\nMost Borrowed Books Report:")
         for row in data:
-            # Format: Clean Code 15 times
             print(f"{row['Title']} {row['borrow_count']} times")
         input("\n(Press Enter to continue)")
 

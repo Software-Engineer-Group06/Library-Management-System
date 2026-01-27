@@ -31,8 +31,7 @@ class UserModel:
         try:
             new_hash = self._hash_password(new_password)
             cursor = self.db.cursor()
-            query = "UPDATE USER SET password = %s WHERE userID = %s"
-            cursor.execute(query, (new_hash, user_id))
+            cursor.execute("UPDATE USER SET password = %s WHERE userID = %s", (new_hash, user_id))
             self.db.commit()
             return True
         except Exception:

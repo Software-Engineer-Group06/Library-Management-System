@@ -24,7 +24,8 @@ class MemberModel:
             FROM MEMBER 
             WHERE memberID LIKE %s 
             ORDER BY memberID 
-            DESC LIMIT 1""", (f"{prefix}%",))
+            DESC LIMIT 1
+            """, (f"{prefix}%",))
         result = cursor.fetchone()
 
         if result:
@@ -53,11 +54,10 @@ class MemberModel:
             hashed_pass = self._hash_password(default_pass)
 
             # Insert vào bảng USER
-            query_user = """
+            cursor.execute("""
                 INSERT INTO USER (userID, username, password, fullName, email, phone, dateOfBirth, role)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, 2)
-            """
-            cursor.execute(query_user, (
+                """, (
                 new_id, new_id, hashed_pass, # username = memberID
                 data['fullname'], data['email'], data['phone'], data['dob']
             ))
@@ -65,11 +65,10 @@ class MemberModel:
             # Insert vào bảng MEMBER
             limit = 10 if data['member_type'] == 'Teacher' else 5
             
-            query_member = """
+            cursor.execute("""
                 INSERT INTO MEMBER (memberID, Department, BorrowLimit, MemberType, userID)
                 VALUES (%s, %s, %s, %s, %s)
-            """
-            cursor.execute(query_member, (
+                """, (
                 new_id, data['department'], limit, data['member_type'], new_id
             ))
 
@@ -84,21 +83,18 @@ class MemberModel:
         try:
             self.db.start_transaction()
             cursor = self.db.cursor()
-
-            query_user = """
+            cursor.execute("""
                 UPDATE USER SET fullName=%s, email=%s, phone=%s, dateOfBirth=%s
                 WHERE userID=%s
-            """
-            cursor.execute(query_user, (
+                """, (
                 data['fullname'], data['email'], data['phone'], data['dob'], member_id
             ))
 
             new_limit = 10 if data['member_type'] == 'Teacher' else 5
-            query_member = """
+            cursor.execute("""
                 UPDATE MEMBER SET Department=%s, MemberType=%s, BorrowLimit=%s
                 WHERE memberID=%s
-            """
-            cursor.execute(query_member, (
+                """, (
                 data['department'], data['member_type'], new_limit, member_id
             ))
 
@@ -111,7 +107,11 @@ class MemberModel:
     def delete_member(self, member_id):
         try:
             cursor = self.db.cursor()
-            cursor.execute("SELECT COUNT(*) FROM BORROW_TRANSACTION WHERE memberID=%s AND ReturnDate IS NULL", (member_id,))
+            cursor.execute("""
+                SELECT COUNT(*) 
+                FROM BORROW_TRANSACTION 
+                WHERE memberID=%s AND ReturnDate IS NULL
+                """, (member_id,))
             if cursor.fetchone()[0] > 0:
                 return False # Có sách chưa trả
 
@@ -126,10 +126,9 @@ class MemberModel:
 
     def get_member_details(self, member_id):
         cursor = self.db.cursor(dictionary=True)
-        query = """
+        cursor.execute("""
             SELECT U.*, M.Department, M.MemberType, M.BorrowLimit
             FROM USER U JOIN MEMBER M ON U.userID = M.memberID 
             WHERE U.userID = %s
-        """
-        cursor.execute(query, (member_id,))
+            """, (member_id,))
         return cursor.fetchone()

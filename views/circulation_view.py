@@ -14,15 +14,11 @@ class CirculationView:
         date_input = input(f"Enter Due Date (DD/MM/YYYY) [Press Enter for 14 days]: ")
         
         if not date_input.strip():
-            # Return YYYY-MM-DD for Database
             return member_id, book_id, (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d'), default_date
         else:
             # Convert DD/MM/YYYY to YYYY-MM-DD
-            try:
-                dt = datetime.strptime(date_input, '%d/%m/%Y')
-                return member_id, book_id, dt.strftime('%Y-%m-%d'), date_input
-            except ValueError:
-                return None, None, None, None
+            dt = datetime.strptime(date_input, '%d/%m/%Y')
+            return member_id, book_id, dt.strftime('%Y-%m-%d'), date_input
 
     def display_issue_success(self, due_date_display):
         print("\nBook issued successfully.")
@@ -53,18 +49,15 @@ class CirculationView:
         input("(Press Enter to continue)")
 
     def display_return_fail(self):
-        """Hiển thị thông báo trả sách thất bại"""
         print("\nReturn failed. Book ID not found or not currently issued.")
         input("(Press Enter to continue)")
 
     def get_fine_check_input(self):
-        """Giao diện nhập Transaction ID để tính phạt"""
         self.clear_screen()
         print("FINE CALCULATION & PAYMENT")
         return input("Enter Transaction ID: ")
 
     def display_fine_details(self, data):
-        """Hiển thị chi tiết tiền phạt"""
         print("\nFine Details:")
         print(f"Transaction ID: {data['TransID']}")
         print(f"Late days: {data['late_days']}")
@@ -86,9 +79,6 @@ class CirculationView:
         print("\nNo fine record found for this Transaction ID.")
         input("(Press Enter to continue)")
     def display_history(self, history):
-        """
-        Hiển thị lịch sử mượn trả
-        """
         self.clear_screen()
         print("BORROWING HISTORY")
         print("-" * 60)
@@ -96,7 +86,6 @@ class CirculationView:
         if not history:
             print("No borrowing history available.")
         else:
-            # Header
             print(f"{'Book Title':<25} | {'Issue Date':<12} | {'Due Date':<12} | {'Return Date'}")
             print("-" * 60)
             for rec in history:
@@ -105,7 +94,6 @@ class CirculationView:
                 d_date = rec['DueDate'].strftime('%d/%m/%Y') if rec['DueDate'] else "N/A"
                 r_date = rec['ReturnDate'].strftime('%d/%m/%Y') if rec['ReturnDate'] else "Not returned"
                 
-                # Cắt ngắn tên sách nếu quá dài
                 title = (rec['Title'][:22] + '..') if len(rec['Title']) > 22 else rec['Title']
                 
                 print(f"{title:<25} | {i_date:<12} | {d_date:<12} | {r_date}")
@@ -113,9 +101,6 @@ class CirculationView:
         input("\n(Press Enter to return...)")
 
     def get_reserve_input(self):
-        """
-        Giao diện nhập ID sách để đặt trước
-        """
         self.clear_screen()
         print("RESERVE BOOK")
         return input("Enter Book ID to reserve: ")

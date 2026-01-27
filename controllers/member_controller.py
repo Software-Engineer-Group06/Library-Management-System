@@ -6,7 +6,7 @@ class MemberController:
         self.model = MemberModel()
         self.view = MemberView()
 
-    def run_register(self):
+    def register_member(self):
         data = self.view.get_register_input()
         
         if data:
@@ -19,7 +19,7 @@ class MemberController:
             else:
                 self.view.display_msg("Registration failed. System Error.")
 
-    def run_update(self):
+    def update_member(self):
         m_id = self.view.get_member_id_input("Update")
         current = self.model.get_member_details(m_id)
         
@@ -36,7 +36,7 @@ class MemberController:
         else:
             self.view.display_msg("Invalid input.")
 
-    def run_delete(self):
+    def delete_member(self):
         m_id = self.view.get_member_id_input("Delete")
         if self.model.delete_member(m_id):
             self.view.display_msg("Member deleted successfully.")

@@ -12,7 +12,6 @@ class AuthController:
     def run(self):
         while True:
             choice = self.view.display_login_menu()
-            
             if choice == '1':
                 self.process_login()
             elif choice == '2':
@@ -38,7 +37,7 @@ class AuthController:
             self.view.display_login_fail()
 
     def process_force_password_change(self):
-        self.view.display_first_login_prompt()
+        self.view.display_first_login_message()
         
         while True:
             new_pass, confirm_pass = self.view.get_new_password_input()
@@ -56,7 +55,7 @@ class AuthController:
         main_ctrl = LibrarianController()
         
         if role == 1:
-            main_ctrl.run_librarian_menu()
+            main_ctrl.librarian_menu()
         else:
             # Cần pass memberID vào để load notification
-            main_ctrl.run_member_menu(self.current_user['userID'])
+            main_ctrl.member_menu(self.current_user['userID'])

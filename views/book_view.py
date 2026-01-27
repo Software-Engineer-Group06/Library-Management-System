@@ -7,13 +7,11 @@ class BookView:
     def get_search_keyword(self):
         self.clear_screen()
         print("SEARCH BOOKS")
-        # Enter search keyword (Title / Author / ISBN / Category):
         return input("Enter search keyword (Title / Author / ISBN / Category): ")
 
     def display_search_results(self, books):
         print("\nSearch Results:")
         if not books:
-            # Output Interface - No results 
             print("No matching books found.")
         else:
             for book in books:

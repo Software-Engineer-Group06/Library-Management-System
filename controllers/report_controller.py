@@ -6,12 +6,12 @@ class ReportController:
         self.model = ReportModel()
         self.view = ReportView()
 
-    def run_member_notifications(self, member_id):
+    def member_notifications(self, member_id):
         """Dành cho Member xem thông báo"""
         notifs = self.model.get_member_notifications(member_id)
         self.view.display_notifications(notifs)
 
-    def run_librarian_reports(self):
+    def librarian_reports(self):
         """Dành cho Librarian xem báo cáo"""
         # Trigger tạo thông báo tự động (Background task simulation)
         self.model.generate_due_date_reminders()

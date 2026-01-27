@@ -6,14 +6,14 @@ class BookController:
         self.model = BookModel()
         self.view = BookView()
 
-    def run_search(self):
+    def search(self):
         keyword = self.view.get_search_keyword()
         
         results = self.model.search_books(keyword)
         
         self.view.display_search_results(results)
 
-    def run_manage(self):
+    def manage_book(self):
         while True:
             # Hiển thị menu Add/Update/Delete
             choice = self.view.display_manage_menu()
@@ -30,10 +30,10 @@ class BookController:
 
             elif choice == '2': # Update
                 book_id = self.view.get_book_id_input("Update")
-                print("Enter new details (Title/Author):") # Giả lập update partial
+                print("Enter new details (Title/Author):")
                 title = input("New Title: ")
                 author = input("New Author: ")
-                # Trong thực tế cần logic load thông tin cũ lên rồi mới sửa
+                
                 if self.model.update_book(book_id, {'title': title, 'author': author}):
                     self.view.display_manage_success()
                 else:
@@ -41,7 +41,6 @@ class BookController:
 
             elif choice == '3': # Delete
                 book_id = self.view.get_book_id_input("Delete")
-                # TODO: Kiểm tra xem sách có đang được mượn không trước khi xóa (Ràng buộc toàn vẹn)
                 if self.model.delete_book(book_id):
                     self.view.display_manage_success()
                 else:

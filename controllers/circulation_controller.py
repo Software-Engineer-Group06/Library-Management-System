@@ -6,7 +6,7 @@ class CirculationController:
         self.model = CirculationModel()
         self.view = CirculationView()
 
-    def run_issue(self):
+    def issue_book(self):
         member_id, book_id, due_date_db, due_date_display = self.view.get_issue_input()
         
         if not member_id:
@@ -23,7 +23,7 @@ class CirculationController:
             self.view.display_issue_success(due_date_display)
         else:
             self.view.display_issue_fail(msg)
-    def run_view_history(self, member_id):
+    def view_history(self, member_id):
         history = self.model.get_borrowing_history(member_id)
         
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -40,7 +40,7 @@ class CirculationController:
                 print(f"Return Date: {r_date}")            
                 print("-" * 20)
         input("(Press Enter)")
-    def run_fine_check(self):
+    def check_fine(self):
         trans_id = self.view.get_fine_check_input()
         
         fine_data = self.model.get_fine_details(trans_id)
@@ -60,12 +60,8 @@ class CirculationController:
         else:
             self.view.display_fine_not_found()
 
-    def run_fine_check(self):
-        # Nhập Transaction ID và hiển thị tiền phạt
-        print("Feature: Check Fine Details")
-        input("(Press Enter)")
 
-    def run_reserve_book(self, member_id):
+    def reserve_book(self, member_id):
         """Thực thi Use Case Reserve Book"""
         # Nhập Book ID
         book_id = self.view.get_reserve_input()
@@ -77,13 +73,11 @@ class CirculationController:
             self.view.display_reserve_success(msg)
         else:
             self.view.display_reserve_fail(msg)
-    def run_return(self):
-        # Input Data
+    def return_book(self):
         book_id = self.view.get_return_input()
         
         result = self.model.return_book(book_id)
         
-        # Output
         if result:
             self.view.display_return_success(result)
         else:

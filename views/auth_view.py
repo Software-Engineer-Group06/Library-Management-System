@@ -13,16 +13,13 @@ class AuthView:
         return input("Select an option: ")
 
     def get_login_input(self):
-        # [cite: 593] If Login is selected:
         username = input("Username: ").strip()
-        # [cite: 61] Password input must be masked
         password = input("Password: ").strip()
         return username, password
 
     def display_login_success(self):
         print("\nLogin successful.")
         print("Redirecting to main menu...")
-        # (Giả lập loading để người dùng đọc kịp thông báo)
         input("(Press Enter to continue)") 
 
     def display_login_fail(self):
@@ -31,7 +28,7 @@ class AuthView:
         print("Please try again.")
         input() # Đợi người dùng đọc xong
 
-    def display_first_login_prompt(self):
+    def display_first_login_message(self):
         """
         Thông báo phát hiện đăng nhập lần đầu
         """
@@ -39,8 +36,8 @@ class AuthView:
         print("Please change your password.")
 
     def get_new_password_input(self):
-        new_pass = getpass.getpass("Enter new password: ")
-        confirm_pass = getpass.getpass("Confirm new password: ")
+        new_pass = input("Enter new password: ").strip()
+        confirm_pass = input("Confirm new password: ").strip()
         return new_pass, confirm_pass
 
     def display_password_success(self):

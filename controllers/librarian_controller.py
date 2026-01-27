@@ -11,33 +11,33 @@ class LibrarianController:
         self.view = LibrarianView()
         self.member_app = MemberController()
 
-    def run_librarian_menu(self):
+    def librarian_menu(self):
         while True:
             choice = self.view.show_menu()
             
             if choice == '1': # Manage Books
-                self.book_app.run_manage()
+                self.book_app.manage_book()
             
             elif choice == '2': # Issue Book
-                self.circ_app.run_issue()
+                self.circ_app.issue_book()
             
             elif choice == '3': # Receive Return
-                self.circ_app.run_return()
+                self.circ_app.return_book()
             
             elif choice == '4': # Calculate Fines
-                self.circ_app.run_fine_check()
+                self.circ_app.check_fine()
             
             elif choice == '5': # Register Member
-                self.member_app.run_register()
+                self.member_app.register_member()
             
             elif choice == '6': # Update Member
-                self.member_app.run_update()
+                self.member_app.update_member()
             
             elif choice == '7': # Delete Member
-                self.member_app.run_delete()
+                self.member_app.delete_member()
             
             elif choice == '8': # Reports
-                self.report_app.run_librarian_reports()
+                self.report_app.librarian_reports()
             
             elif choice == '9': # Logout
                 print("Logged out successfully.")
@@ -45,17 +45,17 @@ class LibrarianController:
             else:
                 print("Invalid option selected.")
 
-    def run_member_menu(self, member_id):
+    def member_menu(self, member_id):
         while True:
             choice = self.view.show_member_menu()
             
             if choice == '1':
-                BookController().run_search()
+                BookController().search()
             elif choice == '2':
-                CirculationController().run_view_history(member_id) 
+                CirculationController().view_history(member_id) 
             elif choice == '3':
-                ReportController().run_member_notifications(member_id)
+                ReportController().member_notifications(member_id)
             elif choice == '4':
-                CirculationController().run_reserve_book(member_id)
+                CirculationController().reserve_book(member_id)
             elif choice == '5':
                 break
