@@ -66,8 +66,17 @@ class CirculationController:
         input("(Press Enter)")
 
     def run_reserve_book(self, member_id):
-        print("Feature: Reserve Book")
-        input("(Press Enter)")
+        """Thực thi Use Case Reserve Book"""
+        # Nhập Book ID
+        book_id = self.view.get_reserve_input()
+        
+        # Gọi Model xử lý (Kiểm tra sách Issued chưa, check trùng lặp...)
+        success, msg = self.model.reserve_book(member_id, book_id)
+        
+        if success:
+            self.view.display_reserve_success(msg)
+        else:
+            self.view.display_reserve_fail(msg)
     def run_return(self):
         # Input Data
         book_id = self.view.get_return_input()

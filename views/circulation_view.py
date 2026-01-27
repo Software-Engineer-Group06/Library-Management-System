@@ -53,14 +53,18 @@ class CirculationView:
         input("(Press Enter to continue)")
 
     def display_return_fail(self):
+        """Hiển thị thông báo trả sách thất bại"""
         print("\nReturn failed. Book ID not found or not currently issued.")
         input("(Press Enter to continue)")
+
     def get_fine_check_input(self):
+        """Giao diện nhập Transaction ID để tính phạt"""
         self.clear_screen()
         print("FINE CALCULATION & PAYMENT")
         return input("Enter Transaction ID: ")
 
     def display_fine_details(self, data):
+        """Hiển thị chi tiết tiền phạt"""
         print("\nFine Details:")
         print(f"Transaction ID: {data['TransID']}")
         print(f"Late days: {data['late_days']}")
@@ -69,7 +73,6 @@ class CirculationView:
         status = "Paid" if data['Paid'] else "Unpaid"
         print(f"Payment status: {status}")
         
-        # Nếu chưa trả, hỏi user có muốn trả luôn không
         if not data['Paid']:
             choice = input("\nDo you want to pay this fine now? (y/n): ")
             return choice.lower() == 'y'
@@ -81,4 +84,46 @@ class CirculationView:
 
     def display_fine_not_found(self):
         print("\nNo fine record found for this Transaction ID.")
+        input("(Press Enter to continue)")
+    def display_history(self, history):
+        """
+        Hiển thị lịch sử mượn trả
+        """
+        self.clear_screen()
+        print("BORROWING HISTORY")
+        print("-" * 60)
+        
+        if not history:
+            print("No borrowing history available.")
+        else:
+            # Header
+            print(f"{'Book Title':<25} | {'Issue Date':<12} | {'Due Date':<12} | {'Return Date'}")
+            print("-" * 60)
+            for rec in history:
+                # Xử lý hiển thị ngày tháng
+                i_date = rec['IssueDate'].strftime('%d/%m/%Y') if rec['IssueDate'] else "N/A"
+                d_date = rec['DueDate'].strftime('%d/%m/%Y') if rec['DueDate'] else "N/A"
+                r_date = rec['ReturnDate'].strftime('%d/%m/%Y') if rec['ReturnDate'] else "Not returned"
+                
+                # Cắt ngắn tên sách nếu quá dài
+                title = (rec['Title'][:22] + '..') if len(rec['Title']) > 22 else rec['Title']
+                
+                print(f"{title:<25} | {i_date:<12} | {d_date:<12} | {r_date}")
+        
+        input("\n(Press Enter to return...)")
+
+    def get_reserve_input(self):
+        """
+        Giao diện nhập ID sách để đặt trước
+        """
+        self.clear_screen()
+        print("RESERVE BOOK")
+        return input("Enter Book ID to reserve: ")
+
+    def display_reserve_success(self, msg):
+        print(f"\n[SUCCESS] {msg}")
+        input("(Press Enter to continue)")
+
+    def display_reserve_fail(self, msg):
+        print(f"\n[FAILED] {msg}")
         input("(Press Enter to continue)")
