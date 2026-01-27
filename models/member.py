@@ -41,14 +41,13 @@ class MemberModel:
             self.db.start_transaction()
             cursor = self.db.cursor()
 
-            # Tự sinh Member ID
             new_id = self._generate_new_member_id()
 
             # Tạo Password mặc định từ DOB
             if 'dob' in data and data['dob']:
                 default_pass = data['dob'].strftime('%d%m%Y')
             else:
-                # Fallback nếu không nhập DOB (dù UI nên bắt buộc)
+                # Fallback nếu không nhập DOB
                 default_pass = "123456" 
             
             hashed_pass = self._hash_password(default_pass)
@@ -123,12 +122,3 @@ class MemberModel:
         except Exception:
             self.db.rollback()
             return False
-
-    def get_member_details(self, member_id):
-        cursor = self.db.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT U.*, M.Department, M.MemberType, M.BorrowLimit
-            FROM USER U JOIN MEMBER M ON U.userID = M.memberID 
-            WHERE U.userID = %s
-            """, (member_id,))
-        return cursor.fetchone()

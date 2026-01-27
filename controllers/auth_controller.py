@@ -57,5 +57,4 @@ class AuthController:
         if role == 1:
             main_ctrl.librarian_menu()
         else:
-            # Cần pass memberID vào để load notification
             main_ctrl.member_menu(self.current_user['userID'])
