@@ -19,21 +19,21 @@ class MemberModel:
         
         cursor = self.db.cursor()
         # Lấy ID lớn nhất hiện tại có prefix tương ứng
-        query = "SELECT memberID FROM MEMBER WHERE memberID LIKE %s ORDER BY memberID DESC LIMIT 1"
-        cursor.execute(query, (f"{prefix}%",))
+        cursor.execute("""
+            SELECT memberID 
+            FROM MEMBER 
+            WHERE memberID LIKE %s 
+            ORDER BY memberID 
+            DESC LIMIT 1""", (f"{prefix}%",))
         result = cursor.fetchone()
 
         if result:
-            # Nếu đã có, lấy số đuôi + 1
-            # format: LIB-2026-001 -> cắt lấy 001
             last_seq = int(result[0].split('-')[-1])
             new_seq = last_seq + 1
         else:
-            # Nếu chưa có, bắt đầu từ 001
             new_seq = 1
             
-        # Format lại thành chuỗi 3 chữ số (001, 002...)
-        return f"{prefix}{new_seq:03d}"
+        return f"{prefix}{new_seq:03d}" # Format lại thành chuỗi 3 chữ số (001, 002...)
 
     def add_member(self, data):
         try:
