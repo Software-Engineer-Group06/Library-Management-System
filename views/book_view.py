@@ -1,48 +1,64 @@
 import os
+
 class BookView:
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
+    
+    def get_search_keyword(self):
+        self.clear_screen()
+        print("SEARCH BOOKS")
+        # Enter search keyword (Title / Author / ISBN / Category):
+        return input("Enter search keyword (Title / Author / ISBN / Category): ")
 
-    def show_menu(self):
-        print("\n=== 📚 BOOK INVENTORY MANAGEMENT ===")
-        print("1. Add New Book")
-        print("2. Search Books")
+    def display_search_results(self, books):
+        print("\nSearch Results:")
+        if not books:
+            # Output Interface - No results 
+            print("No matching books found.")
+        else:
+            for book in books:
+                print(f"Book ID: {book['bookID']}")
+                print(f"Title: {book['title']}")
+                print(f"Author: {book['author']}")
+                print(f"Status: {book['status']}")
+                print("-" * 20)
+        
+        input("\nPress Enter to return...")
+
+
+    def display_manage_menu(self):
+        self.clear_screen()
+        print("BOOK MANAGEMENT")
+        print("1. Add Book")
+        print("2. Update Book")
         print("3. Delete Book")
-        print("4. Back to Main Menu")
-        return input("Select option: ")
+        print("4. Back")
+        return input("Select an option: ")
 
     def get_book_input(self):
-        print("\n--- ENTER BOOK DETAILS ---")
-        title = input("Title: ").strip()
-        author = input("Author: ").strip()
-        isbn = input("ISBN (Optional): ").strip()
-        publisher = input("Publisher: ").strip()
-        category = input("Category (e.g., IT, Science): ").strip()
-        shelf = input("Shelf Location (e.g., A1, B2): ").strip()
+        print("\n--- Enter Book Information ---")
+        book_id = input("Book ID: ")
+        title = input("Title: ")
+        author = input("Author: ")
+        isbn = input("ISBN: ")
+        publisher = input("Publisher: ")
+        category = input("Category: ")
+        shelf = input("Shelf Location: ")
         
-        if not title or not author:
-            print("❌ Title and Author are required!")
-            return None
-        return (title, author, isbn, publisher, category, shelf)
+        return {
+            'bookID': book_id, 'title': title, 'author': author,
+            'ISBN': isbn, 'publisher': publisher, 
+            'category': category, 'shelfLocation': shelf
+        }
 
-    def display_list(self, books):
-        if not books:
-            print("\n(No books found)")
-            return
+    def get_book_id_input(self, action_name):
+        return input(f"\nEnter Book ID to {action_name}: ")
 
-        print(f"\n{'ID':<15} | {'Title':<30} | {'Author':<20} | {'Status':<10} | {'Shelf'}")
-        print("-" * 95)
-        for b in books:
-            # Cắt ngắn title nếu quá dài để không vỡ giao diện
-            short_title = (b['title'][:27] + '..') if len(b['title']) > 27 else b['title']
-            print(f"{b['bookID']:<15} | {short_title:<30} | {b['author']:<20} | {b['status']:<10} | {b['shelfLocation']}")
-        print("-" * 95)
+    def display_manage_success(self):
+        print("\nBook information processed successfully.")
+        input("(Press Enter to continue)")
 
-    def get_search_keyword(self):
-        return input("\nEnter keyword (Title, Author, ID): ").strip()
-
-    def get_delete_id(self):
-        return input("Enter Book ID to DELETE: ").strip()
-
-    def show_message(self, msg):
-        print(f"\n>> {msg}")
+    def display_manage_fail(self):
+        print("\nOperation failed.")
+        print("Invalid or missing book information.")
+        input("(Press Enter to continue)")

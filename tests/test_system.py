@@ -4,7 +4,7 @@ from models.user import UserModel
 from models.book import BookModel
 from models.member import MemberModel
 from models.circulation import CirculationModel
-from models.report_notify import ReportNotifyModel
+from models.report import ReportNotifyModel
 
 @pytest.fixture
 def user_model(): return UserModel()

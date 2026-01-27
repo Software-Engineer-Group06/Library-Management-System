@@ -1,25 +1,23 @@
 import os
-
 class LibrarianView:
     def show_menu(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("\n=== LIBRARIAN DASHBOARD ===")
-        print("1. Register New Member")
-        print("2. Manage Books")
-        print("3. Borrow/Return Books")
-        print("0. Logout")
-        return input("Select: ")
+        print("\nLIBRARIAN MAIN MENU")
+        print("1. Manage Books")
+        print("2. Issue Book")
+        print("3. Receive Returned Book")
+        print("4. Calculate Fines")
+        print("5. Register Member")
+        print("6. Update Member Information")
+        print("7. Delete Member")
+        print("8. Generate Report")
+        print("9. Logout")
+        return input("Select an option: ")
 
-    def get_member_input(self):
-        print("\n--- NEW MEMBER FORM ---")
-        name = input("Full Name: ")
-        email = input("Email: ")
-        phone = input("Phone: ")
-        dept = input("Department: ")
-        
-        print("Type: 1. Student | 2. Teacher")
-        type_choice = input("Select: ")
-        m_type = "Teacher" if type_choice == '2' else "Student"
-        
-        dob = input("Date of Birth (YYYY-MM-DD): ")
-        return name, email, phone, dept, m_type, dob
+    def show_member_menu(self):
+        print("\nMEMBER MAIN MENU")
+        print("1. Search Books")
+        print("2. View Borrowing History")
+        print("3. View Notifications")
+        print("4. Reserve Book")
+        print("5. Logout")
+        return input("Select an option: ")

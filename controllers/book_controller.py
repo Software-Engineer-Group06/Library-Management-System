@@ -6,45 +6,46 @@ class BookController:
         self.model = BookModel()
         self.view = BookView()
 
-    def run(self):
+    def run_search(self):
+        keyword = self.view.get_search_keyword()
+        
+        results = self.model.search_books(keyword)
+        
+        self.view.display_search_results(results)
+
+    def run_manage(self):
         while True:
-            choice = self.view.show_menu()
+            # Hiển thị menu Add/Update/Delete
+            choice = self.view.display_manage_menu()
             
-            if choice == '1':
-                self.add_book()
-            elif choice == '2':
-                self.search_book()
-            elif choice == '3':
-                self.delete_book()
+            if choice == '1': # Add
+                book_data = self.view.get_book_input()
+                if book_data['bookID'] and book_data['title']: # Validate sơ bộ
+                    if self.model.add_book(book_data):
+                        self.view.display_manage_success()
+                    else:
+                        self.view.display_manage_fail()
+                else:
+                    self.view.display_manage_fail()
+
+            elif choice == '2': # Update
+                book_id = self.view.get_book_id_input("Update")
+                print("Enter new details (Title/Author):") # Giả lập update partial
+                title = input("New Title: ")
+                author = input("New Author: ")
+                # Trong thực tế cần logic load thông tin cũ lên rồi mới sửa
+                if self.model.update_book(book_id, {'title': title, 'author': author}):
+                    self.view.display_manage_success()
+                else:
+                    self.view.display_manage_fail()
+
+            elif choice == '3': # Delete
+                book_id = self.view.get_book_id_input("Delete")
+                # TODO: Kiểm tra xem sách có đang được mượn không trước khi xóa (Ràng buộc toàn vẹn)
+                if self.model.delete_book(book_id):
+                    self.view.display_manage_success()
+                else:
+                    self.view.display_manage_fail()
+
             elif choice == '4':
                 break
-            else:
-                self.view.show_message("Invalid option!")
-
-    def add_book(self):
-        data = self.view.get_book_input()
-        if data:
-            new_id = self.model.add_book(*data)
-            if new_id:
-                self.view.show_message(f"✅ Book added successfully! ID: {new_id}")
-            else:
-                self.view.show_message("❌ Failed to add book.")
-
-    def search_book(self):
-        keyword = self.view.get_search_keyword()
-        results = self.model.search_books(keyword)
-        self.view.display_list(results)
-        input("Press Enter to continue...")
-
-    def delete_book(self):
-        book_id = self.view.get_delete_id()
-        if not book_id: 
-            return
-
-        # Xác nhận trước khi xóa
-        confirm = input(f"Are you sure you want to delete {book_id}? (y/n): ")
-        if confirm.lower() == 'y':
-            if self.model.delete_book(book_id):
-                self.view.show_message("✅ Book deleted.")
-            else:
-                self.view.show_message("❌ Book ID not found or error.")

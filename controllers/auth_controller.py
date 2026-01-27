@@ -1,52 +1,62 @@
+import sys
 from models.user import UserModel
-from views.auth_view import AuthView
 from controllers.librarian_controller import LibrarianController
+from views.auth_view import AuthView
 
 class AuthController:
     def __init__(self):
         self.model = UserModel()
         self.view = AuthView()
+        self.current_user = None
 
     def run(self):
         while True:
-            # 1. HIỆN MENU CHÍNH (Chọn 1 hoặc 2)
-            # Hàm này chỉ trả về 1 biến 'choice'
-            choice = self.view.show_login_screen()
+            choice = self.view.display_login_menu()
             
             if choice == '1':
-                # 2. NGƯỜI DÙNG CHỌN LOGIN -> MỚI HIỆN FORM NHẬP
-                self.handle_login()
+                self.process_login()
             elif choice == '2':
-                print("Exiting system...")
-                break
-            else:
-                self.view.show_message("Invalid selection! Please try again.")
+                sys.exit()
 
-    def handle_login(self):
-        try:
-            user_id, password = self.view.get_login_input()
-        except Exception as e:
-            print(f"❌ LỖI TẠI VIEW: {e}")
-            return
-
-        # Gọi Model 
-        try:
-            user = self.model.login(user_id, password)
-        except Exception as e:
-            print(f"❌ LỖI NGHIÊM TRỌNG TRONG MODEL: {e}")
-            print("👉 Gợi ý: Kiểm tra lại tên bảng 'User' hoặc kết nối Database.")
-            return
-
+    def process_login(self):
+        # Lấy input
+        username, password = self.view.get_login_input()
+        
+        # Kiểm tra DB
+        user = self.model.verify_login(username, password)
+        
         if user:
-            try:
-                self.view.show_message(f"Login successful! Welcome {user['fullName']}")
-                 
-                if user['role'] == 1:
-                    lib_app = LibrarianController()
-                    lib_app.run() 
-                else:
-                    self.view.show_message("Student/Teacher Interface is coming soon...")
-            except Exception as e:
-                print(f"❌ LỖI XỬ LÝ SAU LOGIN: {e}")
+            self.current_user = user
+            
+            # Kiểm tra First Login
+            if self.model.check_first_login(user):
+                self.process_force_password_change()
+            else:
+                self.view.display_login_success()
+                self.redirect_to_dashboard(user['role'])
         else:
-            self.view.show_message("Login Failed! Check UserID or Password.")
+            self.view.display_login_fail()
+
+    def process_force_password_change(self):
+        self.view.display_first_login_prompt()
+        
+        while True:
+            new_pass, confirm_pass = self.view.get_new_password_input()
+            
+            if new_pass == confirm_pass:
+                # Update DB
+                if self.model.change_password(self.current_user['userID'], new_pass):
+                    self.view.display_password_success()
+                    self.redirect_to_dashboard(self.current_user['role'])
+                    break
+            else:
+                self.view.display_password_mismatch()
+
+    def redirect_to_dashboard(self, role):
+        main_ctrl = LibrarianController()
+        
+        if role == 1:
+            main_ctrl.run_librarian_menu()
+        else:
+            # Cần pass memberID vào để load notification
+            main_ctrl.run_member_menu(self.current_user['userID'])
