@@ -1,71 +1,76 @@
+-- ================================================================
+-- SQL SCRIPT GENERATED FROM TEST CASES (GROUP 6)
+-- Tự động sinh dữ liệu test từ file Excel
+-- ================================================================
+
 USE LibraryDB;
 
--- 1. DỮ LIỆU USER & MEMBER
+-- ----------------------------------------------------------------
+-- 1. INSERT USERS & MEMBERS
+-- Mật khẩu mặc định:
+-- 'admin@123' -> 7676aaafb027c825bd9abab78b234070e702752f625b752e55e55b48e607e358
+-- '15032006'  -> e1aec3b0f97a019e31d38c938b7e197315c5c12197802f57d249b0c5915f43f5
+-- '123'       -> a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3
+-- ----------------------------------------------------------------
 
-
--- a) LIBRARIAN (TC05)
--- User: ADMIN01 / Pass: admin@123
--- Hash SHA256 của 'admin@123': e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (Ví dụ minh họa, đây là hash rỗng, hãy dùng hash thật bên dưới)
--- Hash thật của 'admin@123': 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9 (Lấy từ bài trước) -> Sửa lại cho đúng pass 'admin@123'
--- Để an toàn, tôi set hash chuẩn cho 'admin@123' là:
--- 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
-
+-- [TC01, TC05] Admin & Member mặc định
 INSERT INTO USER (userID, username, password, fullName, email, phone, dateOfBirth, role) VALUES 
-('ADMIN01', 'ADMIN01', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'System Admin', 'admin@library.com', '0901111111', '1990-01-01', 1);
+('ADMIN01', 'ADMIN01', '7676aaafb027c825bd9abab78b234070e702752f625b752e55e55b48e607e358', 'System Administrator', 'admin@library.com', '0901000000', '1990-01-01', 1),
+('LIB-2025-001', 'LIB-2025-001', 'e1aec3b0f97a019e31d38c938b7e197315c5c12197802f57d249b0c5915f43f5', 'Test Student 01', 'student1@email.com', '0902000001', '2006-03-15', 2);
 
 INSERT INTO LIBRARIAN (userID) VALUES ('ADMIN01');
-
--- MEMBER
--- User: LIB-2025-001 / Pass: 15032006 (Ngày sinh)
--- Hash của '15032006': 5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8
-
-INSERT INTO USER (userID, username, password, fullName, email, phone, dateOfBirth, role) VALUES 
-('LIB-2025-001', 'LIB-2025-001', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'Nguyen Van Test', 'student1@email.com', '0902222222', '2006-03-15', 2);
-
 INSERT INTO MEMBER (memberID, Department, BorrowLimit, MemberType, userID) VALUES 
 ('LIB-2025-001', 'IT', 5, 'Student', 'LIB-2025-001');
 
+-- [TC62] Đăng ký Member mới: Nguyen Van A (Student)
 INSERT INTO USER (userID, username, password, fullName, email, phone, dateOfBirth, role) VALUES 
-('LIB-2025-002', 'LIB-2025-002', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'Le Thi B', 'student2@email.com', '0903333333', '2006-03-15', 2);
+('LIB-2025-101', 'LIB-2025-101', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'Nguyen Van A', 'a@gmail.com', '0902000101', '2000-01-01', 2);
 
 INSERT INTO MEMBER (memberID, Department, BorrowLimit, MemberType, userID) VALUES 
-('LIB-2025-002', 'Business', 5, 'Student', 'LIB-2025-002');
+('LIB-2025-101', 'IT', 5, 'Student', 'LIB-2025-101');
+
+-- [TC66] Đăng ký Member mới: Tran Thi B (Teacher - Limit 10)
+INSERT INTO USER (userID, username, password, fullName, email, phone, dateOfBirth, role) VALUES 
+('LIB-2025-100', 'LIB-2025-100', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'Tran Thi B', 'b@gmail.com', '0902000100', '1985-05-05', 2);
+
+INSERT INTO MEMBER (memberID, Department, BorrowLimit, MemberType, userID) VALUES 
+('LIB-2025-100', 'Mathematics', 10, 'Teacher', 'LIB-2025-100');
 
 
+-- ----------------------------------------------------------------
+-- 2. INSERT BOOKS
+-- Dữ liệu sách lấy từ Test Case (Search, Add, Issue)
+-- ----------------------------------------------------------------
 
--- 2. DỮ LIỆU BOOK
-
+-- [TC12] Clean Code
 INSERT INTO BOOK (bookID, title, author, ISBN, publisher, category, shelfLocation, status) VALUES 
-('B001', 'Clean Code', 'Robert C. Martin', '9780132350884', 'Prentice Hall', 'Software', 'A1-01', 'Issued');
+('B001', 'Clean Code', 'Robert C. Martin', '9780132350884', 'Prentice Hall', 'Software', 'A1-01', 'Available');
 
--- B002: Design Patterns (TC41 Issue Book) -> Trạng thái AVAILABLE
+-- [TC41] Book B002 (Sách dùng để test mượn trả)
 INSERT INTO BOOK (bookID, title, author, ISBN, publisher, category, shelfLocation, status) VALUES 
-('B002', 'Design Patterns', 'Erich Gamma', '9780201633610', 'Addison-Wesley', 'Software', 'A1-02', 'Available');
+('B002', 'Design Patterns', 'Erich Gamma', '9780201633610', 'Addison-Wesley', 'Software', 'A1-02', 'Issued');
 
--- B003: Introduction to Algorithms (TC47 Fine) -> Trạng thái ISSUED (Quá hạn)
+-- [TC32] Python 101 (Sách thêm mới)
 INSERT INTO BOOK (bookID, title, author, ISBN, publisher, category, shelfLocation, status) VALUES 
-('B003', 'Introduction to Algorithms', 'Thomas H. Cormen', '9780262033848', 'MIT Press', 'Academic', 'B2-05', 'Issued');
+('B010', 'Python 101', 'Mike Driscoll', '9781234567890', 'Packt', 'Programming', 'B2-10', 'Available');
 
--- B004: The Pragmatic Programmer -> AVAILABLE (Để test tìm kiếm)
+-- [TC80] Docker Persistence Test (Kiểm tra Volume)
 INSERT INTO BOOK (bookID, title, author, ISBN, publisher, category, shelfLocation, status) VALUES 
-('B004', 'The Pragmatic Programmer', 'Andrew Hunt', '9780201616224', 'Addison-Wesley', 'Software', 'A1-03', 'Available');
+('B080', 'Docker Persistence Test', 'Test Author', '978-DOCKER', 'Tech', 'DevOps', 'D1-01', 'Available');
 
 
--- 3. DỮ LIỆU TRANSACTION
+-- ----------------------------------------------------------------
+-- 3. INSERT TRANSACTIONS (Giả lập mượn trả)
+-- Để test các case trả sách, tính phạt
+-- ----------------------------------------------------------------
 
+-- Giao dịch T001: Member 001 đang mượn sách B002 (Issued)
+-- Mượn cách đây 5 ngày, chưa trả -> Status Issued là hợp lý
 INSERT INTO BORROW_TRANSACTION (TransID, IssueDate, DueDate, ReturnDate, memberID, bookID) VALUES 
-('T001', DATE_SUB(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 9 DAY), NULL, 'LIB-2025-002', 'B001');
+('T001', DATE_SUB(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 9 DAY), NULL, 'LIB-2025-001', 'B002');
 
-INSERT INTO BORROW_TRANSACTION (TransID, IssueDate, DueDate, ReturnDate, memberID, bookID) VALUES 
-('T002', DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_SUB(CURDATE(), INTERVAL 16 DAY), DATE_SUB(CURDATE(), INTERVAL 18 DAY), 'LIB-2025-001', 'B002');
-
-INSERT INTO BORROW_TRANSACTION (TransID, IssueDate, DueDate, ReturnDate, memberID, bookID) VALUES 
-('T003', DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_SUB(CURDATE(), INTERVAL 3 DAY), NULL, 'LIB-2025-002', 'B003');
-
-
--- 4. DỮ LIỆU NOTIFICATION
-
-
+-- ----------------------------------------------------------------
+-- 4. INSERT NOTIFICATIONS (Nếu có)
+-- ----------------------------------------------------------------
 INSERT INTO NOTIFICATION (NotifiID, SentDate, Message, memberID) VALUES 
-('N001', CURDATE(), 'Reminder: Book is due in 2 days.', 'LIB-2025-001'),
-('N002', DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'Welcome to the Library System!', 'LIB-2025-001');
+('N001', CURDATE(), 'Welcome to Library System!', 'LIB-2025-001');

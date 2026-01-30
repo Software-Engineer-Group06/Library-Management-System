@@ -37,6 +37,8 @@ class BookModel:
             self.db.commit()
             return True
         except Exception as e:
+            print(f"\n❌ [DEBUG ERROR] Chi tiết lỗi SQL: {e}")
+            self.db.rollback()
             return False
 
     def update_book(self, book_id, update_data):

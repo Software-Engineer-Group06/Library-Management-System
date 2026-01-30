@@ -1,9 +1,20 @@
 __pycache__
 *.pyc
 *.pyo
+*.pyd
+.pytest_cache
 .git
 .gitignore
+.venv
 venv
+ENV
+UML/
+*.docx
+*.png
+*.jpg
+*.md
+Use Case Description.docx
 .env
-Testing Document N6.xlsx
-*.pdf
+config.py
+Dockerfile
+.dockerignore
